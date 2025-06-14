@@ -1,0 +1,431 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
+from PIL import Image, ImageTk
+
+class HealthCalculator:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Health Calculator")
+        self.root.geometry("800x600")
+        self.root.resizable(False, False)
+        
+        # Style configuration
+        self.style = ttk.Style()
+        self.style.configure('TFrame', background='#f0f0f0')
+        self.style.configure('TLabel', background='#f0f0f0', font=('Arial', 10))
+        self.style.configure('TButton', font=('Arial', 10))
+        self.style.configure('TNotebook.Tab', font=('Arial', 10, 'bold'))
+        
+        # Create notebook for tabs
+        self.notebook = ttk.Notebook(root)
+        self.notebook.pack(fill='both', expand=True)
+        
+        # Create frames for each tab
+        self.bmi_frame = ttk.Frame(self.notebook)
+        self.bmr_frame = ttk.Frame(self.notebook)
+        self.calorie_frame = ttk.Frame(self.notebook)
+        self.diet_frame = ttk.Frame(self.notebook)
+        
+        self.notebook.add(self.bmi_frame, text='BMI Calculator')
+        self.notebook.add(self.bmr_frame, text='BMR Calculator')
+        self.notebook.add(self.calorie_frame, text='Caloric Needs')
+        self.notebook.add(self.diet_frame, text='Diet Chart')
+        
+        # Initialize all tabs
+        self.create_bmi_tab()
+        self.create_bmr_tab()
+        self.create_calorie_tab()
+        self.create_diet_tab()
+    
+    def create_bmi_tab(self):
+        # BMI Tab
+        frame = ttk.Frame(self.bmi_frame)
+        frame.pack(pady=20, padx=20, fill='both', expand=True)
+        
+        ttk.Label(frame, text="BMI Calculator", font=('Arial', 14, 'bold')).grid(row=0, column=0, columnspan=2, pady=10)
+        
+        # Input fields
+        ttk.Label(frame, text="Weight (kg):").grid(row=1, column=0, padx=5, pady=5, sticky='e')
+        self.weight_entry = ttk.Entry(frame)
+        self.weight_entry.grid(row=1, column=1, padx=5, pady=5)
+        
+        ttk.Label(frame, text="Height (cm):").grid(row=2, column=0, padx=5, pady=5, sticky='e')
+        self.height_entry = ttk.Entry(frame)
+        self.height_entry.grid(row=2, column=1, padx=5, pady=5)
+        
+        ttk.Label(frame, text="Age:").grid(row=3, column=0, padx=5, pady=5, sticky='e')
+        self.age_entry = ttk.Entry(frame)
+        self.age_entry.grid(row=3, column=1, padx=5, pady=5)
+        
+        ttk.Label(frame, text="Gender:").grid(row=4, column=0, padx=5, pady=5, sticky='e')
+        self.gender_var = tk.StringVar()
+        self.gender_combobox = ttk.Combobox(frame, textvariable=self.gender_var, values=["Male", "Female"], state="readonly")
+        self.gender_combobox.grid(row=4, column=1, padx=5, pady=5)
+        self.gender_combobox.current(0)
+        
+        # Calculate button
+        ttk.Button(frame, text="Calculate BMI", command=self.calculate_bmi).grid(row=5, column=0, columnspan=2, pady=10)
+        
+        # Result display
+        self.bmi_result = ttk.Label(frame, text="", font=('Arial', 12))
+        self.bmi_result.grid(row=6, column=0, columnspan=2, pady=10)
+        
+        # BMI Categories
+        bmi_categories = ttk.LabelFrame(frame, text="BMI Categories")
+        bmi_categories.grid(row=7, column=0, columnspan=2, pady=10, padx=5, sticky='ew')
+        
+        categories = [
+            "Underweight: < 18.5",
+            "Normal weight: 18.5 - 24.9",
+            "Overweight: 25 - 29.9",
+            "Obesity: ≥ 30"
+        ]
+        
+        for i, category in enumerate(categories):
+            ttk.Label(bmi_categories, text=category).grid(row=i, column=0, sticky='w', padx=5, pady=2)
+    
+    def create_bmr_tab(self):
+        # BMR Tab
+        frame = ttk.Frame(self.bmr_frame)
+        frame.pack(pady=20, padx=20, fill='both', expand=True)
+        
+        ttk.Label(frame, text="BMR Calculator", font=('Arial', 14, 'bold')).grid(row=0, column=0, columnspan=2, pady=10)
+        
+        # Input fields
+        ttk.Label(frame, text="Weight (kg):").grid(row=1, column=0, padx=5, pady=5, sticky='e')
+        self.bmr_weight_entry = ttk.Entry(frame)
+        self.bmr_weight_entry.grid(row=1, column=1, padx=5, pady=5)
+        
+        ttk.Label(frame, text="Height (cm):").grid(row=2, column=0, padx=5, pady=5, sticky='e')
+        self.bmr_height_entry = ttk.Entry(frame)
+        self.bmr_height_entry.grid(row=2, column=1, padx=5, pady=5)
+        
+        ttk.Label(frame, text="Age:").grid(row=3, column=0, padx=5, pady=5, sticky='e')
+        self.bmr_age_entry = ttk.Entry(frame)
+        self.bmr_age_entry.grid(row=3, column=1, padx=5, pady=5)
+        
+        ttk.Label(frame, text="Gender:").grid(row=4, column=0, padx=5, pady=5, sticky='e')
+        self.bmr_gender_var = tk.StringVar()
+        self.bmr_gender_combobox = ttk.Combobox(frame, textvariable=self.bmr_gender_var, 
+                                               values=["Male", "Female"], state="readonly")
+        self.bmr_gender_combobox.grid(row=4, column=1, padx=5, pady=5)
+        self.bmr_gender_combobox.current(0)
+        
+        # Calculate button
+        ttk.Button(frame, text="Calculate BMR", command=self.calculate_bmr).grid(row=5, column=0, columnspan=2, pady=10)
+        
+        # Result display
+        self.bmr_result = ttk.Label(frame, text="", font=('Arial', 12))
+        self.bmr_result.grid(row=6, column=0, columnspan=2, pady=10)
+        
+        # BMR Info
+        info_frame = ttk.LabelFrame(frame, text="About BMR")
+        info_frame.grid(row=7, column=0, columnspan=2, pady=10, padx=5, sticky='ew')
+        
+        info_text = ("Basal Metabolic Rate (BMR) is the number of calories your body needs "
+                    "to accomplish its most basic (basal) life-sustaining functions.")
+        ttk.Label(info_frame, text=info_text, wraplength=400).pack(padx=5, pady=5)
+    
+    def create_calorie_tab(self):
+        # Caloric Needs Tab
+        frame = ttk.Frame(self.calorie_frame)
+        frame.pack(pady=20, padx=20, fill='both', expand=True)
+        
+        ttk.Label(frame, text="Daily Caloric Needs Calculator", font=('Arial', 14, 'bold')).grid(row=0, column=0, columnspan=2, pady=10)
+        
+        # Input fields
+        ttk.Label(frame, text="Weight (kg):").grid(row=1, column=0, padx=5, pady=5, sticky='e')
+        self.cal_weight_entry = ttk.Entry(frame)
+        self.cal_weight_entry.grid(row=1, column=1, padx=5, pady=5)
+        
+        ttk.Label(frame, text="Height (cm):").grid(row=2, column=0, padx=5, pady=5, sticky='e')
+        self.cal_height_entry = ttk.Entry(frame)
+        self.cal_height_entry.grid(row=2, column=1, padx=5, pady=5)
+        
+        ttk.Label(frame, text="Age:").grid(row=3, column=0, padx=5, pady=5, sticky='e')
+        self.cal_age_entry = ttk.Entry(frame)
+        self.cal_age_entry.grid(row=3, column=1, padx=5, pady=5)
+        
+        ttk.Label(frame, text="Gender:").grid(row=4, column=0, padx=5, pady=5, sticky='e')
+        self.cal_gender_var = tk.StringVar()
+        self.cal_gender_combobox = ttk.Combobox(frame, textvariable=self.cal_gender_var, 
+                                              values=["Male", "Female"], state="readonly")
+        self.cal_gender_combobox.grid(row=4, column=1, padx=5, pady=5)
+        self.cal_gender_combobox.current(0)
+        
+        ttk.Label(frame, text="Activity Level:").grid(row=5, column=0, padx=5, pady=5, sticky='e')
+        self.activity_var = tk.StringVar()
+        self.activity_combobox = ttk.Combobox(frame, textvariable=self.activity_var, 
+                                             values=[
+                                                 "Sedentary (little or no exercise)",
+                                                 "Lightly active (light exercise/sports 1-3 days/week)",
+                                                 "Moderately active (moderate exercise/sports 3-5 days/week)",
+                                                 "Very active (hard exercise/sports 6-7 days a week)",
+                                                 "Extra active (very hard exercise/sports & physical job)"
+                                             ], state="readonly")
+        self.activity_combobox.grid(row=5, column=1, padx=5, pady=5)
+        self.activity_combobox.current(1)
+        
+        # Calculate button
+        ttk.Button(frame, text="Calculate Daily Calories", command=self.calculate_calories).grid(row=6, column=0, columnspan=2, pady=10)
+        
+        # Result display
+        self.cal_result = ttk.Label(frame, text="", font=('Arial', 12))
+        self.cal_result.grid(row=7, column=0, columnspan=2, pady=10)
+        
+        # Goal selection
+        ttk.Label(frame, text="Goal:").grid(row=8, column=0, padx=5, pady=5, sticky='e')
+        self.goal_var = tk.StringVar()
+        self.goal_combobox = ttk.Combobox(frame, textvariable=self.goal_var, 
+                                         values=[
+                                             "Maintain weight",
+                                             "Mild weight loss (0.25 kg/week)",
+                                             "Weight loss (0.5 kg/week)",
+                                             "Extreme weight loss (1 kg/week)",
+                                             "Mild weight gain (0.25 kg/week)",
+                                             "Weight gain (0.5 kg/week)",
+                                             "Extreme weight gain (1 kg/week)"
+                                         ], state="readonly")
+        self.goal_combobox.grid(row=8, column=1, padx=5, pady=5)
+        self.goal_combobox.current(0)
+        
+        # Adjusted calories button
+        ttk.Button(frame, text="Calculate Adjusted Calories", command=self.calculate_adjusted_calories).grid(row=9, column=0, columnspan=2, pady=10)
+        
+        # Adjusted result display
+        self.adjusted_cal_result = ttk.Label(frame, text="", font=('Arial', 12))
+        self.adjusted_cal_result.grid(row=10, column=0, columnspan=2, pady=10)
+    
+    def create_diet_tab(self):
+        # Diet Chart Tab
+        frame = ttk.Frame(self.diet_frame)
+        frame.pack(pady=20, padx=20, fill='both', expand=True)
+        
+        ttk.Label(frame, text="Diet Chart Generator", font=('Arial', 14, 'bold')).grid(row=0, column=0, columnspan=2, pady=10)
+        
+        # Input fields
+        ttk.Label(frame, text="Daily Calories:").grid(row=1, column=0, padx=5, pady=5, sticky='e')
+        self.diet_calories_entry = ttk.Entry(frame)
+        self.diet_calories_entry.grid(row=1, column=1, padx=5, pady=5)
+        
+        ttk.Label(frame, text="Diet Preference:").grid(row=2, column=0, padx=5, pady=5, sticky='e')
+        self.diet_pref_var = tk.StringVar()
+        self.diet_pref_combobox = ttk.Combobox(frame, textvariable=self.diet_pref_var, 
+                                             values=[
+                                                 "Balanced",
+                                                 "High Protein",
+                                                 "Low Carb",
+                                                 "Low Fat",
+                                                 "Vegetarian",
+                                                 "Vegan",
+                                                 "Keto"
+                                             ], state="readonly")
+        self.diet_pref_combobox.grid(row=2, column=1, padx=5, pady=5)
+        self.diet_pref_combobox.current(0)
+        
+        # Generate button
+        ttk.Button(frame, text="Generate Diet Chart", command=self.generate_diet).grid(row=3, column=0, columnspan=2, pady=10)
+        
+        # Result display
+        self.diet_result = tk.Text(frame, height=15, width=60, wrap=tk.WORD, font=('Arial', 10))
+        self.diet_result.grid(row=4, column=0, columnspan=2, pady=10, padx=5)
+        scrollbar = ttk.Scrollbar(frame, command=self.diet_result.yview)
+        scrollbar.grid(row=4, column=2, sticky='ns')
+        self.diet_result.config(yscrollcommand=scrollbar.set)
+    
+    def calculate_bmi(self):
+        try:
+            weight = float(self.weight_entry.get())
+            height = float(self.height_entry.get()) / 100  # convert cm to m
+            bmi = weight / (height ** 2)
+            
+            category = ""
+            if bmi < 18.5:
+                category = "Underweight"
+            elif 18.5 <= bmi < 25:
+                category = "Normal weight"
+            elif 25 <= bmi < 30:
+                category = "Overweight"
+            else:
+                category = "Obesity"
+            
+            self.bmi_result.config(text=f"Your BMI: {bmi:.1f} ({category})")
+        except ValueError:
+            messagebox.showerror("Error", "Please enter valid numeric values for weight and height.")
+    
+    def calculate_bmr(self):
+        try:
+            weight = float(self.bmr_weight_entry.get())
+            height = float(self.bmr_height_entry.get())
+            age = int(self.bmr_age_entry.get())
+            gender = self.bmr_gender_var.get()
+            
+            if gender == "Male":
+                bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
+            else:
+                bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
+            
+            self.bmr_result.config(text=f"Your BMR: {bmr:.0f} calories/day")
+        except ValueError:
+            messagebox.showerror("Error", "Please enter valid numeric values.")
+    
+    def calculate_calories(self):
+        try:
+            weight = float(self.cal_weight_entry.get())
+            height = float(self.cal_height_entry.get())
+            age = int(self.cal_age_entry.get())
+            gender = self.cal_gender_var.get()
+            activity = self.activity_combobox.get()
+            
+            # First calculate BMR
+            if gender == "Male":
+                bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
+            else:
+                bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
+            
+            # Then apply activity multiplier
+            activity_multipliers = {
+                "Sedentary (little or no exercise)": 1.2,
+                "Lightly active (light exercise/sports 1-3 days/week)": 1.375,
+                "Moderately active (moderate exercise/sports 3-5 days/week)": 1.55,
+                "Very active (hard exercise/sports 6-7 days a week)": 1.725,
+                "Extra active (very hard exercise/sports & physical job)": 1.9
+            }
+            
+            multiplier = activity_multipliers.get(activity, 1.2)
+            daily_calories = bmr * multiplier
+            
+            self.cal_result.config(text=f"Your daily caloric needs: {daily_calories:.0f} calories/day")
+        except ValueError:
+            messagebox.showerror("Error", "Please enter valid numeric values.")
+    
+    def calculate_adjusted_calories(self):
+        try:
+            current_text = self.cal_result.cget("text")
+            if not current_text.startswith("Your daily caloric needs:"):
+                messagebox.showwarning("Warning", "Please calculate your daily caloric needs first.")
+                return
+            
+            # Extract the base calories from the previous calculation
+            base_calories = float(current_text.split(":")[1].split(" ")[1])
+            
+            goal = self.goal_combobox.get()
+            
+            # Adjust calories based on goal
+            adjustment = 0
+            if "Mild weight loss" in goal:
+                adjustment = -250
+            elif "Weight loss" in goal:
+                adjustment = -500
+            elif "Extreme weight loss" in goal:
+                adjustment = -1000
+            elif "Mild weight gain" in goal:
+                adjustment = 250
+            elif "Weight gain" in goal:
+                adjustment = 500
+            elif "Extreme weight gain" in goal:
+                adjustment = 1000
+            
+            adjusted_calories = base_calories + adjustment
+            
+            self.adjusted_cal_result.config(text=f"Adjusted daily calories: {adjusted_calories:.0f} calories/day")
+        except ValueError:
+            messagebox.showerror("Error", "Unable to calculate adjusted calories.")
+    
+    def generate_diet(self):
+        try:
+            calories = float(self.diet_calories_entry.get())
+            diet_pref = self.diet_pref_var.get()
+            
+            # Macronutrient distribution based on diet preference
+            if diet_pref == "High Protein":
+                protein_pct = 40
+                carbs_pct = 30
+                fat_pct = 30
+            elif diet_pref == "Low Carb":
+                protein_pct = 30
+                carbs_pct = 20
+                fat_pct = 50
+            elif diet_pref == "Low Fat":
+                protein_pct = 30
+                carbs_pct = 55
+                fat_pct = 15
+            elif diet_pref == "Vegetarian":
+                protein_pct = 25
+                carbs_pct = 50
+                fat_pct = 25
+            elif diet_pref == "Vegan":
+                protein_pct = 20
+                carbs_pct = 60
+                fat_pct = 20
+            elif diet_pref == "Keto":
+                protein_pct = 20
+                carbs_pct = 5
+                fat_pct = 75
+            else:  # Balanced
+                protein_pct = 30
+                carbs_pct = 40
+                fat_pct = 30
+            
+            # Calculate grams
+            protein_g = (calories * protein_pct / 100) / 4
+            carbs_g = (calories * carbs_pct / 100) / 4
+            fat_g = (calories * fat_pct / 100) / 9
+            
+            # Sample meal plan
+            if diet_pref in ["Vegetarian", "Vegan"]:
+                protein_sources = "beans, lentils, tofu, tempeh, quinoa" if diet_pref == "Vegan" else "eggs, dairy, beans, lentils"
+                meal_plan = f"""
+                Breakfast: Oatmeal with nuts and fruits
+                Lunch: Large salad with {protein_sources} and vegetables
+                Dinner: Stir-fried vegetables with {protein_sources.split(',')[0]} and brown rice
+                Snacks: Nuts, fruits, vegetable sticks with hummus
+                """
+            elif diet_pref == "High Protein":
+                meal_plan = """
+                Breakfast: Scrambled eggs with whole wheat toast
+                Lunch: Grilled chicken with quinoa and steamed vegetables
+                Dinner: Baked salmon with sweet potato and asparagus
+                Snacks: Greek yogurt, protein shake, cottage cheese
+                """
+            elif diet_pref == "Keto":
+                meal_plan = """
+                Breakfast: Scrambled eggs with avocado and bacon
+                Lunch: Chicken salad with olive oil dressing
+                Dinner: Steak with buttered vegetables
+                Snacks: Cheese, nuts, olives
+                """
+            else:  # Balanced or others
+                meal_plan = """
+                Breakfast: Whole grain cereal with milk and fruits
+                Lunch: Grilled chicken/fish with rice and vegetables
+                Dinner: Lean protein with quinoa and roasted vegetables
+                Snacks: Fruits, nuts, yogurt
+                """
+            
+            # Display results
+            result_text = f"""
+            Diet Preference: {diet_pref}
+            Daily Calories: {calories:.0f}
+            
+            Macronutrient Distribution:
+            - Protein: {protein_g:.1f}g ({protein_pct}%)
+            - Carbohydrates: {carbs_g:.1f}g ({carbs_pct}%)
+            - Fat: {fat_g:.1f}g ({fat_pct}%)
+            
+            Sample Meal Plan:
+            {meal_plan}
+            
+            Note: This is a general guideline. Consult a nutritionist for personalized advice.
+            """
+            
+            self.diet_result.delete(1.0, tk.END)
+            self.diet_result.insert(tk.END, result_text)
+        except ValueError:
+            messagebox.showerror("Error", "Please enter a valid calorie amount.")
+
+# Main application
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = HealthCalculator(root)
+    root.mainloop()
